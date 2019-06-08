@@ -1,8 +1,10 @@
+#!/usr/bin/python3
 import pandas as pd
 import csv
 import os
-import re
+import sys
 
+PATH = os.path.dirname(os.path.abspath(__file__))
 
 def read_bio_number(csvfile="bio_unit_number.csv"):
     dic = {}
@@ -33,8 +35,9 @@ def read_ligands(csvfile="ligands.csv"):
 
 
 def select_from_csv(csvfile):
-    protein_pocket_dict = read_ligands(csvfile="ligands.csv")
-    protein_bio_unit_dict = read_bio_number(csvfile="bio_unit_number.csv")
+    global PATH
+    protein_pocket_dict = read_ligands(csvfile=os.path.join(PATH, "ligands.csv"))
+    protein_bio_unit_dict = read_bio_number(csvfile=os.path.join(PATH, "bio_unit_number.csv"))
     df = pd.read_csv(csvfile, index_col=0)
     print("before selected: {}".format(df.shape))
     nopockets = [
@@ -75,8 +78,8 @@ def select_from_csv(csvfile):
     new_df = new_df.assign(
         n_mer=[protein_bio_unit_dict[ind] for ind in new_df.index])
     new_df = new_df[[
-        'ligand', 'pocket', 'x0(ilbindScore)', 'y(vinaScore)', 'Max1', 'Max2',
-        'Max3', 'x', 'u1(number of chains)', 'u2(number of templates)',
+        'ligand', 'pocket', 'x0(ilbindScore)', 'y(vinaScore)',
+        'u1(number of chains)', 'u2(number of templates)',
         'u3(weight of Drug)', 'n_mer', 'u4(<3A pose count)',
         'u5(Vina satisfied count)', 'u6(maxClusterElementCount)',
         'u7(u6satisfiedu5)', 'u8(radius)', 'u9(center)', 'u10(minDistance)',
@@ -93,5 +96,8 @@ def select_from_csv(csvfile):
 
 
 if __name__ == '__main__':
-
-    select_from_csv(csvfile="017.csv")
+    if len(sys.argv) != 2:
+        print("Usage: script resultcsv.")
+        sys.exit(1)
+    csvfile = sys.argv[1]
+    select_from_csv(csvfile)
